@@ -1,18 +1,11 @@
 <html>
 <head></head>
 <body>
-<h1 align="center">🛡️ DevSecOps Practical Assessment</h1>
 <h2 align="center">Linux User & Access Control</h2>
-
 <p align="center">
-<b>Author:</b> Your Name <br>
-<b>Role:</b> DevSecOps Engineer <br>
-<b>Date:</b> 21/02/2026
-</p>
-
 <hr>
 
-<h2>📌 Overview</h2>
+<h2> Overview</h2>
 
 <p>
 This repository documents the execution of a scenario-based Linux security assessment focused on:
@@ -32,7 +25,7 @@ All tasks were performed entirely in the Linux terminal and validated with syste
 
 <hr>
 
-<h1>🔎 SCENARIO 1 – Password State Investigation & Remediation</h1>
+<h1> SCENARIO 1 – Password State Investigation & Remediation</h1>
 
 <h2>Part A – Create a User Without a Password</h2>
 
@@ -150,7 +143,7 @@ This layered architecture strengthens system security.
 
 <hr>
 
-<h1>🏢 SCENARIO 2 – DevSecOps User & Department Access Configuration</h1>
+<h1> SCENARIO 2 – DevSecOps User & Department Access Configuration</h1>
 
 <h2>Create Department Groups</h2>
 
@@ -267,7 +260,7 @@ Home directory remains intact.
 
 ---
 
-<h1>🔐 Technical Deep Dive</h1>
+<h1>Technical Deep Dive</h1>
 
 <h2>How Linux Tracks Users</h2>
 
@@ -310,7 +303,7 @@ Only `dev_team` members can access.
 
 ---
 
-<h1>📊 Key DevSecOps Principles Demonstrated</h1>
+<h1> Key DevSecOps Principles Demonstrated</h1>
 
 <ul>
 <li>Least Privilege</li>
@@ -323,7 +316,7 @@ Only `dev_team` members can access.
 
 ---
 
-<h1>🧠 Professional Reflection</h1>
+<h1> Professional Reflection</h1>
 
 <p>
 This assessment simulated real-world DevSecOps onboarding and security auditing.
@@ -343,9 +336,5 @@ Through direct interaction with Linux authentication files, group configurations
 <p>
 This project reflects practical Linux security administration aligned with enterprise DevSecOps standards.
 </p>
-
----
-
-<h3 align="center">🚀 End of Assessment</h3>
 </body>
 </html>
