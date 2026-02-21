@@ -1,91 +1,71 @@
-<html>
-<head></head>
-<body>
-<h2 align="center">Linux User & Access Control</h2>
-<p align="center">
-<hr>
 
-<h2> Overview</h2>
+<h2 align="center">DevSecOps Linux User & Access Control</h2>
 
-<p>
+## Overview
+
 This repository documents the execution of a scenario-based Linux security assessment focused on:
-</p>
 
-<ul>
-<li>Password state investigation & remediation</li>
-<li>User and department-based access control</li>
-<li>Least privilege enforcement</li>
-<li>Service account hardening</li>
-<li>Privilege escalation control</li>
-</ul>
+- Password state investigation and remediation  
+- User and department-based access control  
+- Least privilege enforcement  
+- Service account hardening  
+- Privilege escalation control  
 
-<p>
-All tasks were performed entirely in the Linux terminal and validated with system-level verification.
-</p>
+All tasks were performed entirely in the Linux terminal and validated using system-level verification.
 
-<hr>
+# SCENARIO 1 – Password State Investigation & Remediation
 
-<h1> SCENARIO 1 – Password State Investigation & Remediation</h1>
+## Part A – Create a User Without a Password
 
-<h2>Part A – Create a User Without a Password</h2>
-
-<h3>Step 1: Create User</h3>
+### Command
 
 ```bash
 sudo useradd audit_test
 ```
 
-<h3>Step 2: Confirm User Exists</h3>
+### Verification
 
 ```bash
 id audit_test
 grep audit_test /etc/passwd
 ```
 
-<h3>Observation</h3>
+### Evidence
 
-- The user entry exists in `/etc/passwd`
-- The password field contains `x`
-- This indicates password data is stored elsewhere
+<img src="Screenshots/1.png" width="500">
 
-<h3>Explanation</h3>
+### Explanation
 
-Linux stores:
-- User identity information → `/etc/passwd`
-- Password hashes → `/etc/shadow`
+The user was successfully created.  
+User identity information is stored in `/etc/passwd`.  
+The `x` in the password field indicates that authentication data is stored separately in `/etc/shadow`.
 
-This separation improves system security.
 
----
+## Part B – Identify Users Without Passwords
 
-<h2>Part B – Identify Users Without Passwords</h2>
-
-<h3>Inspect Password Storage</h3>
+### Inspect Password Storage
 
 ```bash
 sudo cat /etc/shadow
 ```
 
-<h3>Finding</h3>
+### Before Remediation
 
-Example output:
+<img src="Screenshots/2.png" width="500">
+
+### Observation
 
 ```
-audit_test:!:19876:0:99999:7:::
+audit_test:!:20504:0:99999:7:::
 ```
 
-<h3>Meaning of Symbols</h3>
+Meaning:
 
-| Symbol | Meaning |
-|--------|---------|
-| `!` | Account locked / no active password |
-| `*` | Login disabled |
-| Empty | No password set |
-| `$6$` | SHA-512 hashed password |
+- `!` indicates the account has no active password.
+- Password hashes are stored in `/etc/shadow`.
+- This file is readable only by root.
 
-<h3>Security Validation</h3>
-
-Test as non-privileged user:
+Security validation:
 
 ```bash
 su - audit_test
@@ -98,54 +78,39 @@ Result:
 Permission denied
 ```
 
-<h3>Conclusion</h3>
-
-- `/etc/shadow` is root-protected
-- Password hashes are secured
-- Non-privileged users cannot access authentication data
+This confirms proper privilege separation.
 
 ---
 
-<h2>Part C – Remediation</h2>
+## Part C – Remediation
 
-<h3>Set Password</h3>
+### Set Password
 
 ```bash
 sudo passwd audit_test
 ```
 
-<h3>Verify Password Hash</h3>
+### Verify Password Hash
 
 ```bash
 sudo grep audit_test /etc/shadow
 ```
 
-After remediation:
+### After Remediation
 
-```
-audit_test:$6$randomhashvalue...
-```
+<img src="Screenshots/4.png" width="800">
 
-<h3>Before vs After</h3>
+After setting the password, the entry changes to a hashed value beginning with $y$ indicating yescrypt password hashing algorithm, a modern memory-hard hashing method used in current Linux distributions.
 
-| Before | After |
-|--------|--------|
-| `!` | `$6$hashvalue` |
-| No authentication | Secure hashed password |
+### Security Conclusion
 
-<h3>Security Insight</h3>
+Linux separates identity management (`/etc/passwd`) from authentication storage (`/etc/shadow`), improving overall system security.
 
-Linux separates:
-- Identity management
-- Authentication storage
+---
 
-This layered architecture strengthens system security.
+# SCENARIO 2 – DevSecOps User & Department Access Configuration
 
-<hr>
-
-<h1> SCENARIO 2 – DevSecOps User & Department Access Configuration</h1>
-
-<h2>Create Department Groups</h2>
+## Create Department Groups
 
 ```bash
 sudo groupadd dev_team
@@ -154,15 +119,15 @@ sudo groupadd qa_team
 sudo groupadd ops_team
 ```
 
-Group data is stored in:
+### Evidence
 
-```
-/etc/group
-```
+<img src="Screenshots/5.png" width="600">
+
+Group information is stored in `/etc/group`.
 
 ---
 
-<h2>Create Users</h2>
+## Create Users
 
 ```bash
 sudo useradd -m lateef
@@ -177,7 +142,7 @@ sudo useradd -m aminat
 
 ---
 
-<h2>Assign Department Membership</h2>
+## Assign Department Membership
 
 ```bash
 sudo usermod -aG dev_team lateef
@@ -193,35 +158,35 @@ sudo usermod -aG ops_team alex
 sudo usermod -aG ops_team aminat
 ```
 
-Verify:
+Verification:
 
 ```bash
 groups alex
 ```
 
----
+### Evidence
 
-<h2>Create Service Account (Non-Login)</h2>
+<img src="Screenshots/6.png" width="800">
+
+## Create Service Account (Non-Login)
 
 ```bash
 sudo useradd -r -s /usr/sbin/nologin ci_runner
 ```
 
-<h3>Why Non-Login?</h3>
+Service accounts use non-login shells to:
 
-<ul>
-<li>Prevents interactive access</li>
-<li>Reduces attack surface</li>
-<li>Enforces least privilege</li>
-<li>Aligns with DevSecOps security standards</li>
-</ul>
+- Prevent interactive access  
+- Reduce attack surface  
+- Enforce least privilege  
 
 ---
 
-<h2>Grant Sudo Access to ONE ops_team Member</h2>
+## Grant Sudo to One ops_team Member
 
 ```bash
 sudo usermod -aG sudo alex
+sudo passwd alex
 ```
 
 Verification:
@@ -237,32 +202,34 @@ Expected output:
 root
 ```
 
-All other users remain restricted.
+### Evidence
 
----
+<img src="screenshots/7.png" width="600">
 
-<h2>Remove User but Preserve Home Directory</h2>
+Only `alex` has elevated privileges. All other users remain restricted.
+
+
+## Remove User but Preserve Home Directory
 
 ```bash
 sudo userdel purity
 ```
 
-Home directory remains intact.
+### Evidence
 
-<h3>Why Preserve?</h3>
+<img src="Screenshots/8.png" width="800">
 
-<ul>
-<li>Audit traceability</li>
-<li>Forensic investigations</li>
-<li>Compliance requirements</li>
-<li>Data retention policy</li>
-</ul>
+The home directory was preserved for:
 
----
+- Audit traceability  
+- Compliance requirements  
+- Forensic investigation  
+- Data retention policies  
 
-<h1>Technical Deep Dive</h1>
 
-<h2>How Linux Tracks Users</h2>
+# Technical Summary
+
+## Linux Account Storage Architecture
 
 | File | Purpose |
 |------|----------|
@@ -271,70 +238,26 @@ Home directory remains intact.
 | `/etc/group` | Group membership |
 | `/etc/sudoers` | Privilege escalation control |
 
----
 
-<h2>How Department-Based Access Control Works</h2>
+## DevSecOps Principles Demonstrated
 
-Linux uses:
+- Least Privilege  
+- Role-Based Access Control  
+- Password State Auditing  
+- Service Account Hardening  
+- Controlled Privilege Escalation  
+- Audit Preservation  
 
-- Owner
-- Group
-- Others
 
-Example:
+## Professional Reflection
 
-```bash
-chown :dev_team project/
-chmod 770 project/
-```
+This assessment simulated a real-world DevSecOps onboarding and security audit scenario.
 
-Only `dev_team` members can access.
+Through direct system configuration and validation, the following were demonstrated:
 
----
+- Secure user lifecycle management  
+- Access boundary enforcement  
+- Authentication file inspection  
+- Service account hardening  
+- Controlled privilege escalation  
 
-<h2>Privilege Escalation Control</h2>
-
-- Only selected users added to `sudo`
-- Sudo activity logged in:
-  ```
-  /var/log/auth.log
-  ```
-- Principle of Least Privilege enforced
-
----
-
-<h1> Key DevSecOps Principles Demonstrated</h1>
-
-<ul>
-<li>Least Privilege</li>
-<li>Role-Based Access Control (RBAC)</li>
-<li>Password State Auditing</li>
-<li>Service Account Hardening</li>
-<li>Controlled Privilege Escalation</li>
-<li>Audit Preservation</li>
-</ul>
-
----
-
-<h1> Professional Reflection</h1>
-
-<p>
-This assessment simulated real-world DevSecOps onboarding and security auditing.
-</p>
-
-<p>
-Through direct interaction with Linux authentication files, group configurations, and privilege boundaries, I demonstrated:
-</p>
-
-<ul>
-<li>System-level security awareness</li>
-<li>Operational hardening practices</li>
-<li>Structured access control implementation</li>
-<li>Audit-ready documentation</li>
-</ul>
-
-<p>
-This project reflects practical Linux security administration aligned with enterprise DevSecOps standards.
-</p>
-</body>
-</html>
